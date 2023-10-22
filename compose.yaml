@@ -1,0 +1,16 @@
+volumes:
+  # rabbitmq_data:
+
+services:
+  ####################################
+  # nginx: API Gateway
+  ####################################
+  api-gateway:
+    build:
+      context: ./api-gateway
+      dockerfile: Dockerfile
+    restart: always
+    env_file:
+      - 'dev.env'
+    ports:
+      - "8080:80"
