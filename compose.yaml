@@ -1,7 +1,75 @@
 volumes:
-  # rabbitmq_data:
+  rabbitmq_data:
 
 services:
+  ####################################
+  # Atomic Microservice: Notifications
+  ####################################
+  notifications:
+    build:
+      context: ./services/notifications
+      dockerfile: Dockerfile
+    restart: always
+    depends_on:
+      - rabbitmq
+    env_file:
+      - 'dev.env'
+    environment:
+      PYTHONUNBUFFERED: 1
+  ####################################
+  # Composite Microservice: Booking_Management
+  ####################################
+  bookings:
+    build:
+      context: ./services/booking_management
+      dockerfile: Dockerfile
+    restart: always
+    depends_on:
+      - rabbitmq
+    env_file:
+      - "dev.env"
+    # ports:
+    #   - "30000:5000"
+    environment:
+      PYTHONUNBUFFERED: 1
+  ####################################
+  # Atomic Microservice: Hotels
+  ####################################
+  hotels:
+    build:
+      context: ./services/hotels
+      dockerfile: Dockerfile
+    restart: always
+    depends_on:
+      - rabbitmq
+    env_file:
+      - 'dev.env'
+    ports:
+      - "31000:5000"
+  ####################################
+  # Atomic Microservice: Payment
+  ####################################
+  payment:
+    build:
+      context: ./services/payment
+      dockerfile: Dockerfile
+    restart: always
+    env_file:
+      - 'dev.env'
+    ports:
+      - "30000:5000"
+  ####################################
+  # RabbitMQ: The messaging broker
+  ####################################
+  rabbitmq:
+    image: rabbitmq:3-management
+    hostname: rabbitmq
+    restart: always
+    # ports:
+    #   - "5672:5672"
+    #   - "15672:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
   ####################################
   # nginx: API Gateway
   ####################################
@@ -10,6 +78,9 @@ services:
       context: ./api-gateway
       dockerfile: Dockerfile
     restart: always
+    depends_on:
+      - hotels
+      - bookings
     env_file:
       - 'dev.env'
     ports:
