@@ -44,8 +44,8 @@ services:
       - rabbitmq
     env_file:
       - 'dev.env'
-    ports:
-      - "31000:5000"
+    # ports:
+    #   - "31000:5000"
   ####################################
   # Atomic Microservice: Payment
   ####################################
@@ -59,6 +59,18 @@ services:
     ports:
       - "30000:5000"
   ####################################
+  # Atomic Microservice: Users
+  ####################################
+  users:
+    build:
+      context: ./services/users
+      dockerfile: Dockerfile
+    restart: always
+    env_file:
+      - 'dev.env'
+    # ports:
+    #   - "31000:5000"
+  ####################################
   # RabbitMQ: The messaging broker
   ####################################
   rabbitmq:
@@ -70,9 +82,9 @@ services:
     #   - "15672:15672"
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
-  ####################################
+  ###################################
   # nginx: API Gateway
-  ####################################
+  ###################################
   api-gateway:
     build:
       context: ./api-gateway
@@ -81,6 +93,9 @@ services:
     depends_on:
       - hotels
       - bookings
+      - payment
+      - notifications
+      - users
     env_file:
       - 'dev.env'
     ports:

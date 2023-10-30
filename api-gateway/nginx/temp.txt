@@ -1,64 +1,3 @@
- location /api/v1/hotels(/.*)?$ {
-        if ($request_method != GET) {
-            rewrite ^/api/v1/hotels(/.*)?$ /_api/v1/hotels$1 last;
-        }
-
-        proxy_pass_request_body on;
-        proxy_set_header Content-Length "";
-        proxy_set_header X-Original-URI $request_uri;
-        proxy_pass ${hotels_service_url_internal}/hotels$1;
-    }
-    
-    location /_api/v1/hotels(/.*)?$ {
-        internal;
-        auth_request /_validate_apikey;
-
-        proxy_pass_request_body on;
-        proxy_set_header Content-Length "";
-        proxy_set_header X-Original-URI $request_uri;
-
-        proxy_pass ${hotels_service_url_internal}/hotels$1;
-    }
-    
-
-    location /api/v1/bookings(/.*)?$ {
-        proxy_pass_request_body on;
-        proxy_set_header Content-Length "";
-        proxy_set_header X-Original-URI $request_uri;
-        
-        if ($request_method != GET) {
-            rewrite ^/api/v1/bookings(/.*)?$ /_api/v1/bookings$1 last;
-        }
-
-        proxy_pass ${bookings_service_url_internal}/bookings$1;
-    }
-    
-    location /_api/v1/bookings(/.*)?$ {
-        internal;
-        auth_request /_validate_apikey;
-
-        proxy_pass_request_body on;
-        proxy_set_header Content-Length "";
-        proxy_set_header X-Original-URI $request_uri;
-
-        proxy_pass ${bookings_service_url_internal}/bookings$1;
-    }
-
-    location /api/v1/bookings {
-        if ($request_method != GET) {
-            rewrite ^/api/v1/bookings(/.*)?$ /_api/v1/bookings$1 last;
-        }
-        proxy_pass ${hotels_service_url_internal}/bookings;
-    }
-    
-    location /_api/v1/bookings {
-        internal;
-        auth_request /_validate_apikey;
-        proxy_pass ${bookings_service_url_internal}/bookings;
-    }
-
-
-
     location /api/v1/hotels {
         if ($request_method != GET) {
             rewrite ^/api/v1/hotels(/.*)?$ /_api/v1/hotels$1 last;
@@ -70,19 +9,4 @@
         internal;
         auth_request /_validate_apikey;
         proxy_pass ${hotels_service_url_internal}/hotels;
-    }  
-
-
-
-    location /api/v1/hotels {
-        if ($request_method != GET) {
-            rewrite ^/api/v1/hotels(/.*)?$ /_api/v1/hotels$1 last;
-        }
-        proxy_pass ${hotels_service_url_internal}/hotels;
     }
-    
-    location /_api/v1/hotels {
-        internal;
-        auth_request /_validate_apikey;
-        proxy_pass ${hotels_service_url_internal}/hotels;
-    }    
