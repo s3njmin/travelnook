@@ -2,18 +2,33 @@ volumes:
   rabbitmq_data:
 
 services:
+  # ####################################
+  # # Atomic Microservice: Notifications
+  # ####################################
+  # notifications:
+  #   build:
+  #     context: ./services/notifications
+  #     dockerfile: Dockerfile
+  #   restart: always
+  #   depends_on:
+  #     - rabbitmq
+  #   env_file:
+  #     - 'dev.env'
+  #   environment:
+  #     PYTHONUNBUFFERED: 1
+
   ####################################
-  # Atomic Microservice: Notifications
+  # Microservice: Users
   ####################################
-  notifications:
+  users:
     build:
-      context: ./services/notifications
+      context: ../services/users
       dockerfile: Dockerfile
     restart: always
-    depends_on:
-      - rabbitmq
     env_file:
-      - 'dev.env'
+      - "dev.env"
+    ports:
+      - "33000:5000"
     environment:
       PYTHONUNBUFFERED: 1
   ####################################
@@ -21,15 +36,15 @@ services:
   ####################################
   bookings:
     build:
-      context: ./services/booking_management
+      context: ../services/booking_management
       dockerfile: Dockerfile
     restart: always
     depends_on:
       - rabbitmq
     env_file:
       - "dev.env"
-    # ports:
-    #   - "30000:5000"
+    ports:
+      - "30000:5000"
     environment:
       PYTHONUNBUFFERED: 1
   ####################################
@@ -51,13 +66,29 @@ services:
   ####################################
   payment:
     build:
-      context: ./services/payment
+      context: ../services/payment
       dockerfile: Dockerfile
     restart: always
     env_file:
-      - 'dev.env'
+      - "dev.env"
     ports:
-      - "30000:5000"
+      - "31000:5000"
+
+  ####################################
+  # Atomic Microservice: Hotels
+  ####################################
+  hotels:
+    build:
+      context: ../services/hotels
+      dockerfile: Dockerfile
+    restart: always
+    depends_on:
+      - rabbitmq
+    env_file:
+      - "dev.env"
+    ports:
+      - "32000:5000"
+
   ####################################
   # Atomic Microservice: Users
   ####################################
@@ -77,9 +108,9 @@ services:
     image: rabbitmq:3-management
     hostname: rabbitmq
     restart: always
-    # ports:
-    #   - "5672:5672"
-    #   - "15672:15672"
+    ports:
+      - "5672:5672"
+      - "15672:15672"
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
   ###################################
@@ -97,6 +128,6 @@ services:
       - notifications
       - users
     env_file:
-      - 'dev.env'
+      - "dev.env"
     ports:
       - "8080:80"
