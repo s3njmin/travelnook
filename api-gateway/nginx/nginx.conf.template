@@ -33,8 +33,8 @@ server {
         if ($request_method = OPTIONS) {
             # Handle preflight requests
             add_header 'Access-Control-Allow-Origin' '*';
-            add_header 'Access-Control-Allow-Methods' 'GET, POST, PUT, DELETE, OPTIONS';
-            add_header 'Access-Control-Allow-Headers' 'apikey';
+            add_header 'Access-Control-Allow-Methods' '*';
+            add_header 'Access-Control-Allow-Headers' '*';
             return 200; 
         }
         if ($request_method != GET) {
@@ -59,7 +59,7 @@ server {
 
 
     location /api/v1/bookings/health {
-        proxy_pass http://booking_management:5000/health;
+        proxy_pass http://bookings:5000/health;
     }
 
     location /api/v1/bookings {
@@ -73,13 +73,13 @@ server {
         if ($request_method != GET) {
             rewrite ^/api/v1/bookings(/.*)?$ /_api/v1/bookings$1 last;
         }
-        proxy_pass http://booking_management:5000/bookings;
+        proxy_pass http://bookings:5000/bookings;
     }
     
     location /_api/v1/bookings {
         internal;
         auth_request /_validate_apikey;
-        proxy_pass http://booking_management:5000/bookings;
+        proxy_pass http://bookings:5000/bookings;
     }
 
 
