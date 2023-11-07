@@ -70,6 +70,8 @@ public class NotificationsApplication {
 	// 	return new MessageListenerAdapter(receiver, "receiveMessage");
 	// }
 
+	
+
 	public static void main(String[] args) throws InterruptedException {
 		SpringApplication.run(NotificationsApplication.class, args);
 

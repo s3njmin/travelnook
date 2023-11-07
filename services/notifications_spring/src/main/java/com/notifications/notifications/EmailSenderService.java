@@ -20,7 +20,6 @@ public class EmailSenderService {
         message.setSubject("Booking Confirmed!");
 
         mailSender.send(message);
-
     }
 
     public void sendCancellationEmail(String toEmail, String hotel_name, String room_description) {
@@ -32,10 +31,9 @@ public class EmailSenderService {
         message.setSubject("Booking Cancelled!");
 
         mailSender.send(message);
-
     }
 
-    public void sendPriceUpdateEmail(String toEmail, String hotel_name, String room_description, double price) {
+    public void sendPriceUpdateEmail(String toEmail, String hotel_name, String room_description, float price) {
         SimpleMailMessage message = new SimpleMailMessage();
 
         message.setFrom("hotel.book.updates@gmail.com");
@@ -44,6 +42,16 @@ public class EmailSenderService {
         message.setSubject("Price Update");
 
         mailSender.send(message);
+    }
 
+    public void sendRefundSuccessEmail(String toEmail, String hotel_name, String room_description) {
+        SimpleMailMessage message = new SimpleMailMessage();
+
+        message.setFrom("hotel.book.updates@gmail.com");
+        message.setTo(toEmail);
+        message.setText("Congratulations!\nYour refund for the " + room_description + " at the " + hotel_name + " has been successfully processed!");
+        message.setSubject("Price Update");
+
+        mailSender.send(message);
     }
 }
