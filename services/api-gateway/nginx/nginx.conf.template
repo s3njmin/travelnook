@@ -1,0 +1,102 @@
+map $http_apikey $api_client_name {
+    default "";
+    ${api_gateway_key} "client_admin";
+}
+
+server {
+    listen 80;
+    location = /_validate_apikey {
+        internal;
+        add_header 'Access-Control-Allow-Origin' '*';
+        add_header 'Access-Control-Allow-Headers' '*';
+        if ($http_apikey = "") {
+            return 401; # Unauthorised
+        }
+        if ($api_client_name = "") {
+            return 403; # Forbidden
+        }
+
+        return 204; # OK (no content)
+    }
+
+    location = /favicon.ico {
+        log_not_found off;
+    }
+
+
+    location /api/v1/hotels/health {
+        
+        proxy_pass http://hotels:5000/health;
+    }
+
+    location /api/v1/hotels {
+        if ($request_method = OPTIONS) {
+            # Handle preflight requests
+            add_header 'Access-Control-Allow-Origin' '*';
+            add_header 'Access-Control-Allow-Methods' '*';
+            add_header 'Access-Control-Allow-Headers' '*';
+            return 200; 
+        }
+        if ($request_method != GET) {
+            rewrite ^/api/v1/hotels(/.*)?$ /_api/v1/hotels$1 last;
+        }
+        proxy_pass http://hotels:5000/hotels;
+    }
+    
+    location /_api/v1/hotels {
+        internal;
+        auth_request /_validate_apikey;
+        proxy_pass http://hotels:5000/hotels;
+    }
+
+    location /api/v1/hotels/filter {
+        proxy_pass http://hotels:5000/hotels/filter;
+    }
+
+    location /api/v1/rooms/filter {
+        proxy_pass http://hotels:5000/rooms/filter;
+    }
+
+
+    location /api/v1/bookings/health {
+        proxy_pass http://bookings:5000/health;
+    }
+
+    location /api/v1/bookings {
+        if ($request_method = OPTIONS) {
+            # Handle preflight requests
+            add_header 'Access-Control-Allow-Origin' '*';
+            add_header 'Access-Control-Allow-Methods' '*';
+            add_header 'Access-Control-Allow-Headers' '*';
+            return 200; 
+        }
+        if ($request_method != GET) {
+            rewrite ^/api/v1/bookings(/.*)?$ /_api/v1/bookings$1 last;
+        }
+        proxy_pass http://bookings:5000/bookings;
+    }
+    
+    location /_api/v1/bookings {
+        internal;
+        auth_request /_validate_apikey;
+        proxy_pass http://bookings:5000/bookings;
+    }
+
+
+    location /api/v1/users/health {
+        proxy_pass http://users:5000/health;
+    }
+
+    location /api/v1/get_token {
+        proxy_pass http://users:5000/get_token;
+    }
+
+    location /api/v1/users {
+        proxy_pass http://users:5000/users;
+    }
+
+    location /api/v1/subscriptions {
+        proxy_pass http://users:5000/subscriptions;
+    }
+}
+

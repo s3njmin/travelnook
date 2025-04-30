@@ -5,17 +5,17 @@ services:
   # ####################################
   # # Atomic Microservice: Notifications
   # ####################################
-  # notifications:
-  #   build:
-  #     context: ./services/notifications
-  #     dockerfile: Dockerfile
-  #   restart: always
-  #   depends_on:
-  #     - rabbitmq
-  #   env_file:
-  #     - 'dev.env'
-  #   environment:
-  #     PYTHONUNBUFFERED: 1
+  notifications:
+    build:
+      context: ./services/notifications
+      dockerfile: Dockerfile
+    restart: always
+    depends_on:
+      - rabbitmq
+    env_file:
+      - 'dev.env'
+    environment:
+      PYTHONUNBUFFERED: 1
 
   ####################################
   # Microservice: Users

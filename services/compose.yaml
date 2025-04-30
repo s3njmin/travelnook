@@ -1,0 +1,102 @@
+volumes:
+  rabbitmq_data:
+
+services:
+  ####################################
+  # RabbitMQ: The messaging broker
+  ####################################
+  rabbitmq:
+    image: rabbitmq:3-management
+    hostname: rabbitmq
+    restart: always
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+
+  ####################################
+  # Composite Microservice: Booking_Management
+  ####################################
+  bookings:
+    build:
+      context: ./services/booking_management
+      dockerfile: Dockerfile
+    restart: always
+    depends_on:
+      - rabbitmq
+    env_file:
+      - "dev.env"
+    ports:
+      - "30000:5000"
+    environment:
+      PYTHONUNBUFFERED: 1
+
+  ####################################
+  # Atomic Microservice: Payment
+  ####################################
+  payment:
+    build:
+      context: ./services/payment
+      dockerfile: Dockerfile
+    restart: always
+    env_file:
+      - "dev.env"
+    ports:
+      - "31000:5000"
+    environment:
+      PYTHONUNBUFFERED: 1
+
+  ####################################
+  # Microservice: Hotels
+  ####################################
+  hotels:
+    build:
+      context: ./services/hotels
+      dockerfile: Dockerfile
+    restart: always
+    env_file:
+      - "dev.env"
+    ports:
+      - "32000:5000"
+    environment:
+      PYTHONUNBUFFERED: 1
+
+  ####################################
+  # Stripe-CLI
+  ####################################
+  stripe-cli:
+    image: stripe/stripe-cli
+    container_name: stripe-cli
+    command: "listen --api-key $${STRIPE_API_KEY} --device-name $${STRIPE_DEVICE_NAME} --forward-to payment:5000/webhook"
+    env_file:
+      - dev.env
+
+  ####################################
+  # Microservice: Users
+  ####################################
+  users:
+    build:
+      context: ./services/users
+      dockerfile: Dockerfile
+    restart: always
+    env_file:
+      - "dev.env"
+    ports:
+      - "33000:5000"
+    environment:
+      PYTHONUNBUFFERED: 1
+
+  api-gateway:
+    build:
+      context: ./services/api-gateway/api-gateway
+      dockerfile: Dockerfile
+    restart: always
+    depends_on:
+      - hotels
+      - bookings
+      - users
+    env_file:
+      - dev.env
+    ports:
+      - "8080:80"
